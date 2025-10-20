@@ -31,14 +31,18 @@ header p {
 
 .box {
     display: grid;
-    grid-template-rows: repeat(6, 1fr);
-    gap: 8px;
+    grid-template-rows: repeat(6, auto);
 }
 
 .row {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
+    margin-bottom: 8px;
+}
+
+.row:last-child {
+    margin-bottom: 0;
 }
 
 .tile {
@@ -53,21 +57,24 @@ header p {
     border: 2px solid #3a3a3c;
     border-radius: 4px;
     user-select: none;
-    transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+    transition: all 0.2s;
+    color: #3a3a3c; 
 }
 
-/* State untuk baris aktif yang bisa diklik */
 .row.active .tile {
     cursor: pointer;
-    border-color: #565758;
 }
 
-/* State warna */
+.tile.gray,
+.tile.yellow,
+.tile.green {
+    color: white;
+}
+
 .tile.gray { background-color: #3a3a3c; border-color: #3a3a3c; }
 .tile.yellow { background-color: #b59f3b; border-color: #b59f3b; }
 .tile.green { background-color: #538d4e; border-color: #538d4e; }
 
-/* Style baru untuk tile yang terkunci (hijau permanen) */
 .tile.locked {
     cursor: not-allowed;
     opacity: 0.85;
@@ -78,6 +85,7 @@ header p {
     margin-top: 25px;
     display: flex;
     gap: 10px;
+    justify-content: center;
 }
 
 button {
@@ -101,15 +109,78 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Perbaikan untuk log pesan agar tidak 'mengembang' */
 #message-log {
     margin-top: 15px;
     font-style: italic;
     color: #818384;
-    min-height: 40px; 
+    min-height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Style untuk toggle bahasa sudah dihapus */
+/* === Style untuk Toggle Bahasa di Pojok === */
+.lang-toggle-container {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #3a3a3c;
+    padding: 8px 12px;
+    border-radius: 20px;
+    z-index: 100;
+}
+
+.lang-toggle-container span {
+    color: #d7dadc;
+    font-size: 0.9rem;
+    font-weight: bold;
+    user-select: none;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #818384;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #538d4e;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
