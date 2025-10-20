@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Solver Interface</title>
+    <link rel="stylesheet" href="wordle.css">
+</head>
+<body>
+    <header>
+        <h1>Wordle Solver Interface</h1>
+        <p>Biarkan Python yang menebak, Anda yang memberi feedback warna.</p>
+    </header>
+    
+    <main>
+        <div class="box" id="game-board">
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="row"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="send-feedback-btn" disabled>Kirim Feedback</button>
+            <button id="reset-btn">Mulai Ulang 🔄</button>
+        </div>
+        <p id="message-log">Menghubungi server...</p>
+    </main>
+
+    <script src="wordle.js"></script>
+</body>
+</html>
