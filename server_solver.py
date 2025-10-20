@@ -2,78 +2,86 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-# Impor globals dan fungsi dari solver.py
-from solver import saring_kata, pilih_tebakan_berikutnya, KAMUS_LENGKAP
+from solver import saring_kata, pilih_tebakan_berikutnya, muat_kamus, buat_skor_kata
 
 # --- Inisialisasi Aplikasi Flask ---
 app = Flask(__name__)
 CORS(app)
 
 # --- State Global ---
-if not KAMUS_LENGKAP:
-    print("ERROR: KAMUS_LENGKAP dari solver.py kosong. Pastikan kamus-id.txt ada.")
-    
-# Variabel state game, akan di-reset oleh /start_game
+try:
+    KAMUS_EN = muat_kamus('kamus-en.txt')
+    SKOR_EN = buat_skor_kata(KAMUS_EN)
+    print(f"Kamus EN berhasil dimuat, {len(KAMUS_EN) if KAMUS_EN else 0} kata.")
+except Exception as e:
+    print(f"ERROR: Gagal memuat kamus-en.txt. {e}")
+    KAMUS_EN = []
+    SKOR_EN = {}
+
+try:
+    KAMUS_ID = muat_kamus('kamus-id.txt')
+    SKOR_ID = buat_skor_kata(KAMUS_ID)
+    print(f"Kamus ID berhasil dimuat, {len(KAMUS_ID) if KAMUS_ID else 0} kata.")
+except Exception as e:
+    print(f"ERROR: Gagal memuat kamus-id.txt. {e}")
+    KAMUS_ID = []
+    SKOR_ID = {}
+
 daftar_kata = []
 tebakan_saat_ini = None
-
+skor_kata_aktif = {}
 
 # --- API Endpoint ---
 
 @app.route("/start_game", methods=["GET"])
 def start_game():
-    """
-    Me-reset state server DAN mengirim tebakan awal.
-    """
-    global daftar_kata, tebakan_saat_ini
+    global daftar_kata, tebakan_saat_ini, skor_kata_aktif
     
-    # 1. Reset state
-    if KAMUS_LENGKAP:
-        daftar_kata = KAMUS_LENGKAP[:] # Salin kamus lengkap
+    lang = request.args.get('lang', 'en') 
+
+    if lang == 'id' and KAMUS_ID:
+        daftar_kata = KAMUS_ID[:]
+        skor_kata_aktif = SKOR_ID
+        tebakan_saat_ini = pilih_tebakan_berikutnya(daftar_kata, skor_kata_aktif)
+        lang_terpilih = "ID"
+        
     else:
-        daftar_kata = []
+        # --- LOGIKA UNTUK ENGLISH (DEFAULT) ---
+        daftar_kata = KAMUS_EN[:]
+        skor_kata_aktif = SKOR_EN
+        tebakan_saat_ini = "slate"
+        lang_terpilih = "EN"
     
-    # 2. === PERUBAHAN DI SINI ===
-    # Mengganti tebakan strategis dengan 'lates'
-    # tebakan_saat_ini = pilih_tebakan_berikutnya(daftar_kata) # <-- Versi lama
-    tebakan_saat_ini = "slate" # <-- Versi baru
+    print(f"--- GAME DIMULAI/DIRESET (Bahasa: {lang_terpilih}) --- Tebakan awal: {tebakan_saat_ini}")
     
-    print(f"--- GAME DIMULAI/DIRESET --- Tebakan awal: {tebakan_saat_ini}")
-    
-    # 3. Kirim tebakan
     return jsonify({"guess": tebakan_saat_ini})
 
 
 @app.route("/feedback", methods=["POST"])
 def feedback():
     """
-    Endpoint untuk menerima feedback warna dari frontend,
-    memprosesnya, dan mengirimkan tebakan berikutnya.
+    Memproses feedback dan mengirim tebakan berikutnya.
     """
-    global daftar_kata, tebakan_saat_ini
+    global daftar_kata, tebakan_saat_ini, skor_kata_aktif
 
     if not tebakan_saat_ini:
-        return jsonify({"error": "Permainan belum dimulai. Panggil /start_game dulu."}), 400
+        return jsonify({"error": "Permainan belum dimulai."}), 400
 
     data = request.get_json()
     umpan_balik = data.get("feedback", "").lower()
 
     if len(umpan_balik) != 5 or not all(c in 'gyb' for c in umpan_balik):
-        return jsonify({"error": "Feedback tidak valid. Harus 5 karakter g/y/b."}), 400
+        return jsonify({"error": "Feedback tidak valid."}), 400
 
-    # Saring daftar kata berdasarkan tebakan terakhir dan umpan balik
     daftar_kata = saring_kata(daftar_kata, tebakan_saat_ini, umpan_balik)
-    
-    # Pilih tebakan baru yang TERBAIK dari sisa kata
-    tebakan_baru = pilih_tebakan_berikutnya(daftar_kata)
+    tebakan_baru = pilih_tebakan_berikutnya(daftar_kata, skor_kata_aktif)
 
     if not tebakan_baru:
         return jsonify({
             "guess": None,
-            "message": "Tidak ada kata yang cocok di kamus. Solver menyerah."
+            "message": "fail_no_match"
         })
 
-    # Perbarui tebakan saat ini untuk siklus berikutnya
     tebakan_saat_ini = tebakan_baru
     return jsonify({
         "guess": tebakan_saat_ini,
@@ -82,6 +90,5 @@ def feedback():
 
 # --- Menjalankan Server ---
 if __name__ == "__main__":
-    print(f"Kamus berhasil dimuat, {len(KAMUS_LENGKAP) if KAMUS_LENGKAP else 0} kata.")
     print("-> Server solver berjalan di http://127.0.0.1:5000")
     app.run(debug=True, use_reloader=False)
