@@ -2,27 +2,88 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     
+    // --- Referensi Elemen ---
     const allRows = document.querySelectorAll(".row");
     const sendButton = document.getElementById("send-feedback-btn");
     const resetButton = document.getElementById("reset-btn");
     const messageLog = document.getElementById("message-log");
+    const langCheckbox = document.getElementById("lang-checkbox");
     
-    // Variabel bahasa dan checkbox telah dihapus
-    
+    // --- Elemen yang Diterjemahkan ---
+    const ui = {
+        title: document.getElementById('header-title'),
+        subtitle: document.getElementById('header-subtitle'),
+        sendBtn: document.getElementById('send-feedback-btn'),
+        resetBtn: document.getElementById('reset-btn')
+    };
+
+    // --- Kamus Terjemahan (i18n) ---
+    const translations = {
+        en: {
+            title: "Wordle Solver Interface",
+            subtitle: "Let Python guess, you provide the color feedback.",
+            send_btn: "Send Feedback",
+            reset_btn: "Reset",
+            loading_dict: "Loading English dictionary...",
+            feedback_prompt: "Click the tiles to give color feedback.",
+            thinking: "Solver is thinking...",
+            success: "Success! The word was found. 🎉",
+            fail_no_match: "Solver gave up. No matching word in the dictionary.",
+            fail_no_tries: "Failed to find the word in 6 tries.",
+            fail_connection: "Failed to connect to Python server. Ensure it's running.",
+            fail_no_guess: "Failed to load guess."
+        },
+        id: {
+            title: "Antarmuka Solver Wordle",
+            subtitle: "Biar Python menebak, Anda yang memberi umpan balik warna.",
+            send_btn: "Kirim Umpan Balik",
+            reset_btn: "Mulai Ulang",
+            loading_dict: "Memuat kamus Indonesia...",
+            feedback_prompt: "Klik kotak untuk memberi umpan balik warna.",
+            thinking: "Solver sedang berpikir...",
+            success: "Berhasil! Kata ditemukan. 🎉",
+            fail_no_match: "Solver menyerah. Tidak ada kata yang cocok di kamus.",
+            fail_no_tries: "Gagal menemukan kata dalam 6 percobaan.",
+            fail_connection: "Gagal terhubung ke server Python. Pastikan server berjalan.",
+            fail_no_guess: "Gagal memuat tebakan."
+        }
+    };
+
+    // --- State Aplikasi ---
     let currentRowIndex = 0;
     let gameActive = true;
-    let knownGreens = {}; // Memori untuk tile hijau
+    let knownGreens = {};
+    let currentLang = 'en'; // Default ke English
 
-    // 1. Buat petak permainan 6x5
-    allRows.forEach((row, rIndex) => {
-        for (let i = 0; i < 5; i++) {
-            const tile = document.createElement("div");
-            tile.classList.add("tile");
-            tile.dataset.index = i; 
-            tile.addEventListener("click", () => toggleColor(tile, rIndex));
-            row.appendChild(tile);
+    // --- Fungsi Terjemahan ---
+    function updateLanguage(lang) {
+        const t = translations[lang];
+        ui.title.textContent = t.title;
+        ui.subtitle.textContent = t.subtitle;
+        ui.sendBtn.textContent = t.send_btn;
+        ui.resetBtn.textContent = t.reset_btn;
+    }
+
+    function getMessage(key, lang = currentLang, extraInfo = "") {
+        if (key && translations[lang][key]) {
+            return translations[lang][key];
         }
-    });
+        return extraInfo || key; 
+    }
+
+    // --- Logika Inti Permainan ---
+
+    // 1. Buat petak kosong di awal
+    function createEmptyGrid() {
+        allRows.forEach(row => {
+            row.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const tile = document.createElement("div");
+                tile.classList.add("tile");
+                row.appendChild(tile);
+            }
+        });
+    }
 
     // 2. Fungsi untuk mengubah warna tile
     function toggleColor(tile, rIndex) {
@@ -39,24 +100,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 3. Fungsi untuk menampilkan tebakan (termasuk mengunci tile hijau)
+    // 3. Fungsi untuk menampilkan tebakan
     function displayGuess(guess, rIndex) {
         const row = allRows[rIndex];
         if (!row) return;
-        const tiles = row.querySelectorAll(".tile");
+
+        row.innerHTML = '';
+        
         guess.split("").forEach((letter, i) => {
-            tiles[i].textContent = letter.toUpperCase();
+            const tile = document.createElement("div");
+            tile.classList.add("tile");
+            tile.dataset.index = i;
+            tile.addEventListener("click", () => toggleColor(tile, rIndex));
+            tile.textContent = letter.toUpperCase();
+            
             if (knownGreens[i] === letter.toLowerCase()) {
-                tiles[i].classList.add("green", "locked");
+                tile.classList.add("green", "locked");
             } else {
-                tiles[i].classList.add("gray");
+                tile.classList.add("gray");
             }
+            row.appendChild(tile);
         });
+        
         row.classList.add("active");
         sendButton.disabled = false;
     }
     
-    // 4. Fungsi untuk mengirim feedback ke server
+    // 4. Fungsi untuk mengirim feedback
     async function sendFeedback() {
         if (!gameActive) return;
 
@@ -64,13 +134,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const tiles = activeRow.querySelectorAll(".tile");
         let feedback = "";
 
-        // Update memori 'knownGreens'
         tiles.forEach((tile) => {
             const letter = tile.textContent.toLowerCase();
             const index = tile.dataset.index;
             if (tile.classList.contains("green")) {
-                feedback += "g"; 
-                knownGreens[index] = letter; 
+                feedback += "g"; knownGreens[index] = letter; 
             } else if (tile.classList.contains("yellow")) {
                 feedback += "y";
             } else {
@@ -79,12 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (feedback === "ggggg") {
-            messageLog.textContent = "Berhasil! Kata ditemukan. 🎉";
+            messageLog.textContent = getMessage('success');
             gameActive = false; sendButton.disabled = true; return;
         }
 
         try {
-            messageLog.textContent = "Solver sedang berpikir...";
+            messageLog.textContent = getMessage('thinking');
             sendButton.disabled = true;
             
             const res = await fetch("http://127.0.0.1:5000/feedback", {
@@ -98,49 +166,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (data.guess && currentRowIndex < 6) {
                 displayGuess(data.guess, currentRowIndex);
-                messageLog.textContent = data.message || "Masukkan feedback untuk tebakan baru.";
+                messageLog.textContent = getMessage('feedback_prompt', currentLang, data.message);
             } else {
                 gameActive = false; sendButton.disabled = true;
-                messageLog.textContent = data.message || "Gagal menemukan kata dalam 6 percobaan.";
+                messageLog.textContent = getMessage(data.message || 'fail_no_tries');
             }
         } catch (error) {
-            messageLog.textContent = "Koneksi ke server Python gagal. Pastikan server berjalan.";
+            messageLog.textContent = getMessage('fail_connection');
         }
     }
 
     // 5. Fungsi untuk mereset permainan
     function resetGame() {
-        // Cukup reload halaman. Ini akan otomatis memanggil startGame()
-        // dan server akan mereset statenya.
-        location.reload();
+        currentRowIndex = 0;
+        gameActive = true;
+        knownGreens = {};
+        sendButton.disabled = true;
+        
+        updateLanguage(currentLang);
+        startGame(currentLang);
     }
 
     // 6. Fungsi untuk memulai permainan
-    async function startGame() {
-        knownGreens = {}; // Reset memori hijau
+    async function startGame(lang) {
+        createEmptyGrid();
+        messageLog.textContent = getMessage('loading_dict', lang);
+        
         try {
-            messageLog.textContent = "Memuat kamus...";
-            
-            // Panggil /start_game (tanpa parameter bahasa)
-            const res = await fetch("http://127.0.0.1:5000/start_game");
+            const res = await fetch(`http://127.0.0.1:5000/start_game?lang=${lang}`);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             
             const data = await res.json();
             if (data.guess) {
                 displayGuess(data.guess, 0);
-                messageLog.textContent = "Klik kotak untuk memberi feedback warna.";
+                messageLog.textContent = getMessage('feedback_prompt');
             } else {
-                messageLog.textContent = "Gagal memuat tebakan.";
+                messageLog.textContent = getMessage('fail_no_guess');
             }
         } catch (error) {
-            messageLog.textContent = "Gagal terhubung ke server Python. Pastikan server berjalan.";
+            messageLog.textContent = getMessage('fail_connection');
         }
     }
     
-    // 7. Event listener untuk tombol
+    // 7. Event Listeners
     sendButton.addEventListener("click", sendFeedback);
-    resetButton.addEventListener("click", resetGame);
+    resetButton.addEventListener("click", resetGame); 
     
-    // Mulai permainan saat halaman dimuat
-    startGame();
+    langCheckbox.addEventListener('change', () => {
+        currentLang = langCheckbox.checked ? 'id' : 'en';
+        resetGame();
+    });
+    
+    resetGame();
 });
