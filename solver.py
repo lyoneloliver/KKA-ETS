@@ -3,12 +3,11 @@
 import random
 from collections import Counter
 
-def muat_kamus(nama_file='kamus-en.txt'): # Default ke kamus-id.txt
+def muat_kamus(nama_file):
     """Membaca file kamus dan mengembalikan list berisi kata 5 huruf."""
     try:
         with open(nama_file, 'r', encoding='utf-8') as file:
             daftar_kata = [baris.strip().lower() for baris in file]
-        # Filter kata 5 huruf dan pastikan tidak kosong
         hasil = [kata for kata in daftar_kata if len(kata) == 5]
         if not hasil:
             print(f"Peringatan: Tidak ada kata 5 huruf yang ditemukan di {nama_file}")
@@ -48,11 +47,6 @@ def buat_skor_kata(daftar_kata):
             skor = int(skor * 1.2)
         skor_kata[kata] = skor
     return skor_kata
-
-# --- Inisialisasi Global ---
-# Dibuat SATU KALI saat server diimpor
-KAMUS_LENGKAP = muat_kamus() # Menggunakan filename default
-SKOR_KATA = buat_skor_kata(KAMUS_LENGKAP)
 
 # --- Fungsi Penyaringan (Filter) ---
 
@@ -94,17 +88,13 @@ def saring_kata(daftar_kata, tebakan_terakhir, umpan_balik):
 
 # --- Fungsi Pemilihan (Sortir) ---
 
-def pilih_tebakan_berikutnya(daftar_kata):
-    """
-    Memilih kata terbaik dari sisa daftar_kata berdasarkan SKOR_KATA global.
-    """
+def pilih_tebakan_berikutnya(daftar_kata, skor_kata_kamus):
     if not daftar_kata:
         return None
     
-    # Sortir daftar kata yang tersisa berdasarkan skor (tertinggi dulu)
     kata_terurut = sorted(
         daftar_kata, 
-        key=lambda kata: SKOR_KATA.get(kata, 0), # Gunakan SKOR_KATA global
+        key=lambda kata: skor_kata_kamus.get(kata, 0),
         reverse=True
     )
     
