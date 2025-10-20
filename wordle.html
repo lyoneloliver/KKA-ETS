@@ -7,9 +7,19 @@
     <link rel="stylesheet" href="wordle.css">
 </head>
 <body>
+
+    <div class="lang-toggle-container">
+        <span>EN</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="lang-checkbox">
+            <span class="slider"></span>
+        </label>
+        <span>ID</span>
+    </div>
+
     <header>
-        <h1>Wordle Solver Interface</h1>
-        <p>Biarkan Python yang menebak, Anda yang memberi feedback warna.</p>
+        <h1 id="header-title">Wordle Solver Interface</h1>
+        <p id="header-subtitle">Biarkan Python yang menebak, Anda yang memberi feedback warna.</p>
     </header>
     
     <main>
@@ -24,9 +34,9 @@
         
         <div class="controls">
             <button id="send-feedback-btn" disabled>Kirim Feedback</button>
-            <button id="reset-btn">Mulai Ulang 🔄</button>
+            <button id="reset-btn">Mulai Ulang</button>
         </div>
-        <p id="message-log">Menghubungi server...</p>
+        <p id="message-log">Memuat...</p>
     </main>
 
     <script src="wordle.js"></script>
