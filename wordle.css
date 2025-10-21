@@ -108,9 +108,17 @@ button:disabled {
     color: #787c7e;
     cursor: not-allowed;
 }
-
 #message-log {
-    margin-top: 15px;
+    position: fixed;
+    bottom: 0px;             /* Jarak dari bawah layar */
+    left: 50%;                /* Posisi tengah secara horizontal */
+    transform: translateX(-50%); /* Geser balik separuh lebarnya supaya center sempurna */
+    text-align: center;
+    width: 100%;
+    max-width: 400px;         /* Biar gak terlalu lebar di layar besar */
+    padding: 8px 12px;
+    background-color: rgba(18, 18, 19, 0.9);
+    border-radius: 8px;
     font-style: italic;
     color: #818384;
     min-height: 40px;
@@ -118,6 +126,7 @@ button:disabled {
     align-items: center;
     justify-content: center;
 }
+
 
 /* === Style untuk Toggle Bahasa di Pojok === */
 .lang-toggle-container {
@@ -184,3 +193,4 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(20px);
 }
+

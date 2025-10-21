@@ -1,14 +1,14 @@
 // wordle.js
 
 document.addEventListener("DOMContentLoaded", () => {
-    
+
     // --- Referensi Elemen ---
     const allRows = document.querySelectorAll(".row");
     const sendButton = document.getElementById("send-feedback-btn");
     const resetButton = document.getElementById("reset-btn");
     const messageLog = document.getElementById("message-log");
     const langCheckbox = document.getElementById("lang-checkbox");
-    
+
     // --- Elemen yang Diterjemahkan ---
     const ui = {
         title: document.getElementById('header-title'),
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetBtn: document.getElementById('reset-btn')
     };
 
-    // --- Kamus Terjemahan (i18n) ---
+    // --- Kamus Terjemahan ---
     const translations = {
         en: {
             title: "Wordle Solver Interface",
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentRowIndex = 0;
     let gameActive = true;
     let knownGreens = {};
-    let currentLang = 'en'; // Default ke English
+    let currentLang = 'en'; // Default
 
     // --- Fungsi Terjemahan ---
     function updateLanguage(lang) {
@@ -68,12 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (key && translations[lang][key]) {
             return translations[lang][key];
         }
-        return extraInfo || key; 
+        return extraInfo || key;
     }
 
-    // --- Logika Inti Permainan ---
-
-    // 1. Buat petak kosong di awal
+    // --- Buat Petak Kosong ---
     function createEmptyGrid() {
         allRows.forEach(row => {
             row.innerHTML = '';
@@ -85,48 +83,69 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. Fungsi untuk mengubah warna tile
-    function toggleColor(tile, rIndex) {
+    // --- Fungsi Ganti Warna (klik kiri/kanan) ---
+    function changeColor(tile, rIndex, direction = 1) {
         if (rIndex !== currentRowIndex || !gameActive || !tile.textContent || tile.classList.contains("locked")) {
             return;
         }
-        if (tile.classList.contains("yellow")) {
-            tile.classList.replace("yellow", "green");
-        } else if (tile.classList.contains("green")) {
-            tile.classList.replace("green", "gray");
+
+        const colors = ["gray", "yellow", "green"];
+        let currentColorIndex = colors.findIndex(c => tile.classList.contains(c));
+
+        // Hapus semua warna dulu
+        colors.forEach(c => tile.classList.remove(c));
+
+        if (direction === 1) {
+            // Klik kiri → maju
+            currentColorIndex = (currentColorIndex + 1) % colors.length;
         } else {
-            tile.classList.remove("gray");
-            tile.classList.add("yellow");
+            // Klik kanan → mundur
+            currentColorIndex = (currentColorIndex - 1 + colors.length) % colors.length;
         }
+
+        tile.classList.add(colors[currentColorIndex]);
     }
 
-    // 3. Fungsi untuk menampilkan tebakan
+    // --- Tampilkan Tebakan ---
     function displayGuess(guess, rIndex) {
         const row = allRows[rIndex];
         if (!row) return;
 
         row.innerHTML = '';
-        
+
         guess.split("").forEach((letter, i) => {
             const tile = document.createElement("div");
             tile.classList.add("tile");
             tile.dataset.index = i;
-            tile.addEventListener("click", () => toggleColor(tile, rIndex));
             tile.textContent = letter.toUpperCase();
-            
+
+            // Warna awal
             if (knownGreens[i] === letter.toLowerCase()) {
                 tile.classList.add("green", "locked");
             } else {
                 tile.classList.add("gray");
             }
+
+            // Klik kiri
+            tile.addEventListener("click", (e) => {
+                e.preventDefault();
+                changeColor(tile, rIndex, 1);
+            });
+
+            // Klik kanan
+            tile.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                changeColor(tile, rIndex, -1);
+            });
+
             row.appendChild(tile);
         });
-        
+
         row.classList.add("active");
         sendButton.disabled = false;
     }
-    
-    // 4. Fungsi untuk mengirim feedback
+
+    // --- Kirim Feedback ---
     async function sendFeedback() {
         if (!gameActive) return;
 
@@ -138,7 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const letter = tile.textContent.toLowerCase();
             const index = tile.dataset.index;
             if (tile.classList.contains("green")) {
-                feedback += "g"; knownGreens[index] = letter; 
+                feedback += "g";
+                knownGreens[index] = letter;
             } else if (tile.classList.contains("yellow")) {
                 feedback += "y";
             } else {
@@ -148,16 +168,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (feedback === "ggggg") {
             messageLog.textContent = getMessage('success');
-            gameActive = false; sendButton.disabled = true; return;
+            gameActive = false;
+            sendButton.disabled = true;
+            return;
         }
 
         try {
             messageLog.textContent = getMessage('thinking');
             sendButton.disabled = true;
-            
+
             const res = await fetch("http://127.0.0.1:5000/feedback", {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ feedback: feedback })
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ feedback })
             });
             const data = await res.json();
 
@@ -168,7 +191,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 displayGuess(data.guess, currentRowIndex);
                 messageLog.textContent = getMessage('feedback_prompt', currentLang, data.message);
             } else {
-                gameActive = false; sendButton.disabled = true;
+                gameActive = false;
+                sendButton.disabled = true;
                 messageLog.textContent = getMessage(data.message || 'fail_no_tries');
             }
         } catch (error) {
@@ -176,26 +200,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 5. Fungsi untuk mereset permainan
+    // --- Reset Game ---
     function resetGame() {
         currentRowIndex = 0;
         gameActive = true;
         knownGreens = {};
         sendButton.disabled = true;
-        
+
         updateLanguage(currentLang);
         startGame(currentLang);
     }
 
-    // 6. Fungsi untuk memulai permainan
+    // --- Mulai Game ---
     async function startGame(lang) {
         createEmptyGrid();
         messageLog.textContent = getMessage('loading_dict', lang);
-        
+
         try {
             const res = await fetch(`http://127.0.0.1:5000/start_game?lang=${lang}`);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            
+
             const data = await res.json();
             if (data.guess) {
                 displayGuess(data.guess, 0);
@@ -207,15 +231,16 @@ document.addEventListener("DOMContentLoaded", () => {
             messageLog.textContent = getMessage('fail_connection');
         }
     }
-    
-    // 7. Event Listeners
+
+    // --- Event Listeners ---
     sendButton.addEventListener("click", sendFeedback);
-    resetButton.addEventListener("click", resetGame); 
-    
+    resetButton.addEventListener("click", resetGame);
+
     langCheckbox.addEventListener('change', () => {
         currentLang = langCheckbox.checked ? 'id' : 'en';
         resetGame();
     });
-    
+
+    // --- Inisialisasi ---
     resetGame();
 });
