@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Kamus Terjemahan ---
     const translations = {
         en: {
-            title: "Wordle Solver Interface",
+            title: "Wordle Solver",
             subtitle: "Let Python guess, you provide the color feedback.",
             send_btn: "Send Feedback",
             reset_btn: "Reset",
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fail_no_guess: "Failed to load guess."
         },
         id: {
-            title: "Antarmuka Solver Wordle",
+            title: "Wordle Solver",
             subtitle: "Biar Python menebak, Anda yang memberi umpan balik warna.",
             send_btn: "Kirim Umpan Balik",
             reset_btn: "Mulai Ulang",
@@ -244,3 +244,4 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Inisialisasi ---
     resetGame();
 });
+
