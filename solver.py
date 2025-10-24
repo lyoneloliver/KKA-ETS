@@ -1,7 +1,7 @@
-# solver.py (versi CSP)
+
 from collections import Counter, defaultdict
 
-# === 1. Muat Kamus ===
+
 def muat_kamus(nama_file):
     try:
         with open(nama_file, 'r', encoding='utf-8') as file:
@@ -18,7 +18,7 @@ def muat_kamus(nama_file):
         return []
 
 
-# === 2. Penskoran Kata ===
+
 def hitung_frekuensi_huruf(daftar_kata):
     freq = Counter()
     for kata in daftar_kata:
@@ -39,15 +39,15 @@ def buat_skor_kata(daftar_kata):
     return skor
 
 
-# === 3. Model CSP ===
+
 class WordleCSP:
     def __init__(self, kamus):
         self.kamus_awal = kamus
-        self.kandidat = kamus[:]   # domain global
-        self.constraint_hijau = {} # posisi -> huruf
-        self.constraint_kuning = defaultdict(set) # posisi -> huruf tak boleh di situ
-        self.constraint_ada = Counter()  # huruf minimal muncul
-        self.constraint_tidak_ada = set()  # huruf yang pasti tidak muncul
+        self.kandidat = kamus[:]   
+        self.constraint_hijau = {} 
+        self.constraint_kuning = defaultdict(set) 
+        self.constraint_ada = Counter()  
+        self.constraint_tidak_ada = set()  
 
     def tambah_feedback(self, tebakan, feedback):
         """
@@ -55,35 +55,35 @@ class WordleCSP:
         g = green, y = yellow, b = black/gray
         """
         for i, (huruf, fb) in enumerate(zip(tebakan, feedback)):
-            if fb == 'g':  # GREEN
+            if fb == 'g':  
                 self.constraint_hijau[i] = huruf
                 self.constraint_ada[huruf] += 1
-            elif fb == 'y':  # YELLOW
+            elif fb == 'y':  
                 self.constraint_kuning[i].add(huruf)
                 self.constraint_ada[huruf] += 1
-            elif fb == 'b':  # GRAY
+            elif fb == 'b':  
                 if huruf not in self.constraint_ada:
                     self.constraint_tidak_ada.add(huruf)
 
     def konsisten(self, kata):
         """Periksa apakah kata memenuhi semua constraint CSP."""
-        # Green constraint
+        
         for i, huruf in self.constraint_hijau.items():
             if kata[i] != huruf:
                 return False
 
-        # Yellow constraint
+        
         for pos, huruf_set in self.constraint_kuning.items():
             for h in huruf_set:
                 if kata[pos] == h or h not in kata:
                     return False
 
-        # Huruf minimal harus muncul
+        
         for huruf, jumlah_min in self.constraint_ada.items():
             if kata.count(huruf) < jumlah_min:
                 return False
 
-        # Huruf yang dilarang
+        
         for huruf in self.constraint_tidak_ada:
             if huruf in kata:
                 return False
@@ -102,9 +102,9 @@ class WordleCSP:
         return terbaik[0]
 
 
-# === 4. Fungsi Wrapper untuk Server ===
+
 def saring_kata(daftar_kata, tebakan_terakhir, feedback):
-    # Ini hanya kompatibilitas untuk endpoint Flask
+    
     csp = WordleCSP(daftar_kata)
     csp.tambah_feedback(tebakan_terakhir, feedback)
     csp.saring_domain()

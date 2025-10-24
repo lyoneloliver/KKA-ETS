@@ -1,14 +1,14 @@
-# server_solver.py
+
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from solver import saring_kata, pilih_tebakan_berikutnya, muat_kamus, buat_skor_kata
 
-# --- Inisialisasi Aplikasi Flask ---
+
 app = Flask(__name__)
 CORS(app)
 
-# --- State Global ---
+
 try:
     KAMUS_EN = muat_kamus('kamus-en.txt')
     SKOR_EN = buat_skor_kata(KAMUS_EN)
@@ -31,7 +31,7 @@ daftar_kata = []
 tebakan_saat_ini = None
 skor_kata_aktif = {}
 
-# --- API Endpoint ---
+
 
 @app.route("/start_game", methods=["GET"])
 def start_game():
@@ -46,7 +46,7 @@ def start_game():
         lang_terpilih = "ID"
         
     else:
-        # --- LOGIKA UNTUK ENGLISH (DEFAULT) ---
+        
         daftar_kata = KAMUS_EN[:]
         skor_kata_aktif = SKOR_EN
         tebakan_saat_ini = "slate"
@@ -88,7 +88,7 @@ def feedback():
         "message": f"{len(daftar_kata)} kata tersisa."
     })
 
-# --- Menjalankan Server ---
+
 if __name__ == "__main__":
     print("-> Server solver berjalan di http://127.0.0.1:5000")
     app.run(debug=True, use_reloader=False)

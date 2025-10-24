@@ -58,7 +58,7 @@ header p {
     border-radius: 4px;
     user-select: none;
     transition: all 0.2s;
-    color: #3a3a3c; 
+    color: #3a3a3c;
 }
 
 .row.active .tile {
@@ -71,9 +71,20 @@ header p {
     color: white;
 }
 
-.tile.gray { background-color: #3a3a3c; border-color: #3a3a3c; }
-.tile.yellow { background-color: #b59f3b; border-color: #b59f3b; }
-.tile.green { background-color: #538d4e; border-color: #538d4e; }
+.tile.gray {
+    background-color: #3a3a3c;
+    border-color: #3a3a3c;
+}
+
+.tile.yellow {
+    background-color: #b59f3b;
+    border-color: #b59f3b;
+}
+
+.tile.green {
+    background-color: #538d4e;
+    border-color: #538d4e;
+}
 
 .tile.locked {
     cursor: not-allowed;
@@ -108,14 +119,19 @@ button:disabled {
     color: #787c7e;
     cursor: not-allowed;
 }
+
 #message-log {
     position: fixed;
-    bottom: 0px;             /* Jarak dari bawah layar */
-    left: 50%;                /* Posisi tengah secara horizontal */
-    transform: translateX(-50%); /* Geser balik separuh lebarnya supaya center sempurna */
+    bottom: 0px;
+    /* Jarak dari bawah layar */
+    left: 50%;
+    /* Posisi tengah secara horizontal */
+    transform: translateX(-50%);
+    /* Geser balik separuh lebarnya supaya center sempurna */
     text-align: center;
     width: 100%;
-    max-width: 400px;         /* Biar gak terlalu lebar di layar besar */
+    max-width: 400px;
+    /* Biar gak terlalu lebar di layar besar */
     padding: 8px 12px;
     background-color: rgba(18, 18, 19, 0.9);
     border-radius: 8px;
@@ -127,8 +143,6 @@ button:disabled {
     justify-content: center;
 }
 
-
-/* === Style untuk Toggle Bahasa di Pojok === */
 .lang-toggle-container {
     position: fixed;
     top: 15px;
@@ -186,11 +200,10 @@ button:disabled {
     border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: #538d4e;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     transform: translateX(20px);
 }
-
