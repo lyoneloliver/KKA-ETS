@@ -1,15 +1,12 @@
-// wordle.js
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // --- Referensi Elemen ---
     const allRows = document.querySelectorAll(".row");
     const sendButton = document.getElementById("send-feedback-btn");
     const resetButton = document.getElementById("reset-btn");
     const messageLog = document.getElementById("message-log");
     const langCheckbox = document.getElementById("lang-checkbox");
 
-    // --- Elemen yang Diterjemahkan ---
     const ui = {
         title: document.getElementById('header-title'),
         subtitle: document.getElementById('header-subtitle'),
@@ -17,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resetBtn: document.getElementById('reset-btn')
     };
 
-    // --- Kamus Terjemahan ---
     const translations = {
         en: {
             title: "Wordle Solver",
@@ -27,10 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
             loading_dict: "Loading English dictionary...",
             feedback_prompt: "Click the tiles to give color feedback.",
             thinking: "Solver is thinking...",
-            success: "Success! The word was found. 🎉",
+            success: "Success! The word was found. ",
             fail_no_match: "Solver gave up. No matching word in the dictionary.",
             fail_no_tries: "Failed to find the word in 6 tries.",
-            fail_connection: "Failed to connect to Python server. Ensure it's running.",
+            fail_connection: "Failed to connect to Python server..",
             fail_no_guess: "Failed to load guess."
         },
         id: {
@@ -41,21 +37,19 @@ document.addEventListener("DOMContentLoaded", () => {
             loading_dict: "Memuat kamus Indonesia...",
             feedback_prompt: "Klik kotak untuk memberi umpan balik warna.",
             thinking: "Solver sedang berpikir...",
-            success: "Berhasil! Kata ditemukan. 🎉",
+            success: "Berhasil! Kata ditemukan. ",
             fail_no_match: "Solver menyerah. Tidak ada kata yang cocok di kamus.",
             fail_no_tries: "Gagal menemukan kata dalam 6 percobaan.",
-            fail_connection: "Gagal terhubung ke server Python. Pastikan server berjalan.",
+            fail_connection: "Gagal terhubung ke server Python",
             fail_no_guess: "Gagal memuat tebakan."
         }
     };
 
-    // --- State Aplikasi ---
     let currentRowIndex = 0;
     let gameActive = true;
     let knownGreens = {};
-    let currentLang = 'en'; // Default
+    let currentLang = 'en'; 
 
-    // --- Fungsi Terjemahan ---
     function updateLanguage(lang) {
         const t = translations[lang];
         ui.title.textContent = t.title;
@@ -71,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return extraInfo || key;
     }
 
-    // --- Buat Petak Kosong ---
     function createEmptyGrid() {
         allRows.forEach(row => {
             row.innerHTML = '';
@@ -83,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- Fungsi Ganti Warna (klik kiri/kanan) ---
     function changeColor(tile, rIndex, direction = 1) {
         if (rIndex !== currentRowIndex || !gameActive || !tile.textContent || tile.classList.contains("locked")) {
             return;
@@ -92,21 +84,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const colors = ["gray", "yellow", "green"];
         let currentColorIndex = colors.findIndex(c => tile.classList.contains(c));
 
-        // Hapus semua warna dulu
         colors.forEach(c => tile.classList.remove(c));
 
         if (direction === 1) {
-            // Klik kiri → maju
             currentColorIndex = (currentColorIndex + 1) % colors.length;
         } else {
-            // Klik kanan → mundur
             currentColorIndex = (currentColorIndex - 1 + colors.length) % colors.length;
         }
 
         tile.classList.add(colors[currentColorIndex]);
     }
 
-    // --- Tampilkan Tebakan ---
     function displayGuess(guess, rIndex) {
         const row = allRows[rIndex];
         if (!row) return;
@@ -119,20 +107,17 @@ document.addEventListener("DOMContentLoaded", () => {
             tile.dataset.index = i;
             tile.textContent = letter.toUpperCase();
 
-            // Warna awal
             if (knownGreens[i] === letter.toLowerCase()) {
                 tile.classList.add("green", "locked");
             } else {
                 tile.classList.add("gray");
             }
 
-            // Klik kiri
             tile.addEventListener("click", (e) => {
                 e.preventDefault();
                 changeColor(tile, rIndex, 1);
             });
 
-            // Klik kanan
             tile.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
                 changeColor(tile, rIndex, -1);
@@ -145,7 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sendButton.disabled = false;
     }
 
-    // --- Kirim Feedback ---
     async function sendFeedback() {
         if (!gameActive) return;
 
@@ -200,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Reset Game ---
     function resetGame() {
         currentRowIndex = 0;
         gameActive = true;
@@ -211,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
         startGame(currentLang);
     }
 
-    // --- Mulai Game ---
     async function startGame(lang) {
         createEmptyGrid();
         messageLog.textContent = getMessage('loading_dict', lang);
@@ -232,7 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Event Listeners ---
     sendButton.addEventListener("click", sendFeedback);
     resetButton.addEventListener("click", resetGame);
 
@@ -241,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resetGame();
     });
 
-    // --- Inisialisasi ---
     resetGame();
 });
 

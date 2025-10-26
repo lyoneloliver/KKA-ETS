@@ -1,5 +1,3 @@
-
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from solver import saring_kata, pilih_tebakan_berikutnya, muat_kamus, buat_skor_kata
@@ -8,30 +6,18 @@ from solver import saring_kata, pilih_tebakan_berikutnya, muat_kamus, buat_skor_
 app = Flask(__name__)
 CORS(app)
 
+KAMUS_EN = muat_kamus('kamus-en.txt')
+SKOR_EN = buat_skor_kata(KAMUS_EN)
+print(f"Kamus EN berhasil dimuat, {len(KAMUS_EN) if KAMUS_EN else 0} kata.")
 
-try:
-    KAMUS_EN = muat_kamus('kamus-en.txt')
-    SKOR_EN = buat_skor_kata(KAMUS_EN)
-    print(f"Kamus EN berhasil dimuat, {len(KAMUS_EN) if KAMUS_EN else 0} kata.")
-except Exception as e:
-    print(f"ERROR: Gagal memuat kamus-en.txt. {e}")
-    KAMUS_EN = []
-    SKOR_EN = {}
+KAMUS_ID = muat_kamus('kamus-id.txt')
+SKOR_ID = buat_skor_kata(KAMUS_ID)
+print(f"Kamus ID berhasil dimuat, {len(KAMUS_ID) if KAMUS_ID else 0} kata.")
 
-try:
-    KAMUS_ID = muat_kamus('kamus-id.txt')
-    SKOR_ID = buat_skor_kata(KAMUS_ID)
-    print(f"Kamus ID berhasil dimuat, {len(KAMUS_ID) if KAMUS_ID else 0} kata.")
-except Exception as e:
-    print(f"ERROR: Gagal memuat kamus-id.txt. {e}")
-    KAMUS_ID = []
-    SKOR_ID = {}
 
 daftar_kata = []
 tebakan_saat_ini = None
 skor_kata_aktif = {}
-
-
 
 @app.route("/start_game", methods=["GET"])
 def start_game():
@@ -59,9 +45,7 @@ def start_game():
 
 @app.route("/feedback", methods=["POST"])
 def feedback():
-    """
-    Memproses feedback dan mengirim tebakan berikutnya.
-    """
+
     global daftar_kata, tebakan_saat_ini, skor_kata_aktif
 
     if not tebakan_saat_ini:
