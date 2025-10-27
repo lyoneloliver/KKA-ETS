@@ -6,7 +6,8 @@
     { "src": "*.css", "use": "@vercel/static" },
     { "src": "*.js", "use": "@vercel/static" }
   ],
-  "rewrites": [
-    { "source": "/", "destination": "/wordle.html" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/app.py" },
+    { "src": "/", "dest": "/wordle.html" }
   ]
 }
