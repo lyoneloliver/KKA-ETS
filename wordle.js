@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const allRows = document.querySelectorAll(".row");
@@ -23,10 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
             loading_dict: "Loading English dictionary...",
             feedback_prompt: "Click the tiles to give color feedback.",
             thinking: "Solver is thinking...",
-            success: "Success! The word was found. ",
+            success: "Success! The word was found. 🎉",
             fail_no_match: "Solver gave up. No matching word in the dictionary.",
             fail_no_tries: "Failed to find the word in 6 tries.",
-            fail_connection: "Failed to connect to Python server..",
+            fail_connection: "Failed to connect to the server.", // Pesan digeneralisasi
             fail_no_guess: "Failed to load guess."
         },
         id: {
@@ -37,10 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
             loading_dict: "Memuat kamus Indonesia...",
             feedback_prompt: "Klik kotak untuk memberi umpan balik warna.",
             thinking: "Solver sedang berpikir...",
-            success: "Berhasil! Kata ditemukan. ",
+            success: "Berhasil! Kata ditemukan. 🎉",
             fail_no_match: "Solver menyerah. Tidak ada kata yang cocok di kamus.",
             fail_no_tries: "Gagal menemukan kata dalam 6 percobaan.",
-            fail_connection: "Gagal terhubung ke server Python",
+            fail_connection: "Gagal terhubung ke server.", // Pesan digeneralisasi
             fail_no_guess: "Gagal memuat tebakan."
         }
     };
@@ -161,7 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
             messageLog.textContent = getMessage('thinking');
             sendButton.disabled = true;
 
-            const res = await fetch("http://127.0.0.1:5000/feedback", {
+
+            const res = await fetch("/api/feedback", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ feedback })
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageLog.textContent = getMessage('loading_dict', lang);
 
         try {
-            const res = await fetch(`http://127.0.0.1:5000/start_game?lang=${lang}`);
+            const res = await fetch(`/api/start_game?lang=${lang}`);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
             const data = await res.json();

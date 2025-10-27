@@ -1,16 +1,23 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from solver import saring_kata, pilih_tebakan_berikutnya, muat_kamus, buat_skor_kata
-
-
+import os 
 app = Flask(__name__)
 CORS(app)
 
-KAMUS_EN = muat_kamus('kamus-en.txt')
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+def get_path(filename):
+    """Mendapatkan path absolut ke file di direktori yang sama."""
+    return os.path.join(__location__, filename)
+
+
+KAMUS_EN = muat_kamus(get_path('kamus-en.txt')) 
 SKOR_EN = buat_skor_kata(KAMUS_EN)
 print(f"Kamus EN berhasil dimuat, {len(KAMUS_EN) if KAMUS_EN else 0} kata.")
 
-KAMUS_ID = muat_kamus('kamus-id.txt')
+KAMUS_ID = muat_kamus(get_path('kamus-id.txt')) 
 SKOR_ID = buat_skor_kata(KAMUS_ID)
 print(f"Kamus ID berhasil dimuat, {len(KAMUS_ID) if KAMUS_ID else 0} kata.")
 
@@ -73,6 +80,3 @@ def feedback():
     })
 
 
-if __name__ == "__main__":
-    print("-> Server solver berjalan di http://127.0.0.1:5000")
-    app.run(debug=True, use_reloader=False)
