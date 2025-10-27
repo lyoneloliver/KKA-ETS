@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
             sendButton.disabled = true;
 
 
-            const res = await fetch("/api/feedback", {
+            const res = await fetch("/api/app/feedback", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ feedback })
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageLog.textContent = getMessage('loading_dict', lang);
 
         try {
-            const res = await fetch(`/api/start_game?lang=${lang}`);
+            const res = await fetch("/api/app/start_game?lang=" + lang);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
             const data = await res.json();

@@ -79,5 +79,3 @@ def feedback():
         "message": f"{len(daftar_kata)} kata tersisa."
     })
 
-if __name__ == "__main__":
-    app.run(debug=True)
