@@ -68,7 +68,6 @@ Isi kedua file tersebut dengan daftar kata 5 huruf (satu kata per baris) sesuai 
 Sangat disarankan untuk menggunakan *virtual environment*.
 
 ```sh
-# Buat virtual environment 
 python -m venv venv
 
 # Aktifkan virtual environment
