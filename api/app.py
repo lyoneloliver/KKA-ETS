@@ -6,12 +6,10 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-__location__ = os.path.realpath(
-    os.path.join(os.getcwd(), os.path.dirname(__file__))
-)
+__root__ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_path(filename):
-    return os.path.join(__location__, filename)
+    return os.path.join(__root__, filename)
 
 KAMUS_EN = muat_kamus(get_path('kamus-en.txt'))
 SKOR_EN = buat_skor_kata(KAMUS_EN)
