@@ -12,7 +12,7 @@ Solver ini mendukung dua bahasa: **Inggris** dan **Indonesia**.
   * **Antarmuka Web Interaktif**: Frontend sederhana untuk memasukkan umpan balik warna dengan mudah.
   * **Arsitektur Client-Server**: Logika solver berjalan di server Python (Flask), sementara antarmuka pengguna berjalan di browser.
 
-## 🛠️ Teknologi yang Digunakan
+## Teknologi yang Digunakan
 
   * **Backend**: Python, Flask, Flask-CORS
   * **Frontend**: HTML, CSS, JavaScript
